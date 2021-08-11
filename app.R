@@ -8,6 +8,7 @@
 
 
 #Project initial
+library(DT)
 library(shiny)
 library(shinythemes)
 library(readxl)
@@ -54,6 +55,28 @@ latLongZoom <- latLongZoom.original
 
 #Read in the data
 joined.data.original <- read_csv("joined.csv")
+
+joined.data.original1 <- read_csv("joined.csv")
+
+secondarydefinitions = read_excel("/Users/xingzewang/Downloads/TestFactSheetDefinitions.xlsx")
+#Data Cleaning - changed all the NA into 0 and "N/A"
+joined.data.original1[["orig_yr"]][is.na(joined.data.original1["orig_yr"])]=0
+joined.data.original1[["dest_yr"]][is.na(joined.data.original1["dest_yr"])]=0
+joined.data.original1[["textile_quantity"]][is.na(joined.data.original1["textile_quantity"])]=0
+joined.data.original1[["quant_ells"]][is.na(joined.data.original1["quant_ells"])]=0
+joined.data.original1[["units_ells"]][is.na(joined.data.original1["units_ells"])]=0
+joined.data.original1[["value_per_piece"]][is.na(joined.data.original1["value_per_piece"])]=0
+joined.data.original1[is.na(joined.data.original1)]="N/A"
+
+#changing textile names
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Kannekijns"]<-"Kannekyns"
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Carroots"]<-"Corroots"
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Pattamaroepoe"]<-"Pattamaraphoe"
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Nicanees"]<-"Nickanees"
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Deken"]<-"Dekens"
+joined.data.original1$textile_name[joined.data.original1$textile_name=="Tannyzijde"]<-"Tannazijde"
+joined.data.original <- joined.data.original1
+
 map.data.original <- readOGR("filteredCountries.GeoJSON")
 
 #make copies of original data
@@ -88,7 +111,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                   radioButtons(inputId = "dataSet",
                                label = "Choose company of interest",
                                choices = c("WIC", "VOC", "Both"),
-                               selected = "Both"),
+                               selected = "WIC"),
                   radioButtons(inputId = "dataType",
                                label = "Choose data type of interest",
                                choices = c("Quantity", "Value"),
@@ -122,6 +145,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                                  
                   #               multiple = TRUE),
                   uiOutput(outputId = "TextileName"),
+                  uiOutput(outputId = "Regions"),
                   uiOutput(outputId = "Colors"),
                   uiOutput(outputId = "Pattern"),
                   uiOutput(outputId = "Process"),
@@ -160,10 +184,8 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                   #                choices = levels(factor(c(joined.data$orig_yr,joined.data$dest_yr))),
                   #                multiple = TRUE),
                   actionButton(inputId = "updateBtn",
-                               label = "Click to update map!"),
+                               label = "Click to update map and tables!"),
                   br(), br(),
-                  actionButton(inputId = 'table_updateBtn',
-                               label = 'Click to update table!'),
                   br(), br(), #The inputs for the pie chart and bar chart
                   selectInput(inputId = "pieChart",
                               label = "Choose a modifier for the pie chart:",
@@ -192,12 +214,16 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                              p("The app that we designed is an interactive map focused on the trade of textiles from 1710 to 1715. The Map Explorer allows the user to choose a company and data type of interest, while filtering by textile modifiers, and displays an interactive world map with a complementary pie chart and bar chart when a specific country is selected. The Table Explorer displays the compiled and cleaned dataset."),
                              p("The information presented within this app is messy historical data transcribed from invoices and ledgers that is currently part of a larger ongoing research project investigating interconnected patterns of textile trade in the VOC and WIC. Many of the textile names and types are now obsolete and at present have been cleaned and grouped to the best of our ability using secondary source materials. Historically, the Dutch used the tripartite format of Holland guilders as their currency. Using the debkeepr package developed by Dr. Jesse Sadler, a historian of early modern Europe from Virginia Tech, the currency values are converted in a decimal format for ease of visualization. Uncertainty still remains between differences between Dutch and Indian guilders and unit discrepancies. For the WIC dataset, one piece is equal to one ell (~ 27 inches), but for the VOC dataset this relationship varies."),
                     ),
-                    tabPanel(title = "Map Explorer",
+                    tabPanel(title = "Book Definitions",
+                             dataTableOutput('factsheet'),
+                             downloadButton("downloadData1", "Download Table")
+                    ),
+                    tabPanel(title = "Interactive Map",
                              leafletOutput(outputId = "countriesMap"),
                              plotOutput(outputId = "pieChart"),
                              plotOutput(outputId = "barChart") #outputId = 
                     ),
-                    tabPanel(title = "Table Explorer",
+                    tabPanel(title = "Data - Catalog",
                              dataTableOutput('update_inputs'),
                              downloadButton("downloadData", "Download Table") #download button
                     ),
@@ -247,7 +273,109 @@ server <- function(input, output, session) {
   # 
   
   
+  reactivedata1 <- reactive({
+    input$updateBtn
+    #input$graph_updateBtn
+    input$table_updateBtn
+    
+    #reading in all of the inputs, isolating them
+    # dataSet <- isolate(input$dataSet)
+    # dataType <- isolate(input$dataType)
+    # regionChoice <- isolate(input$regionChoice)
+    textileName <- isolate(input$textileName)
+    # colors <- isolate(input$colors)
+    # patterns <- isolate(input$patterns)
+    # process <- isolate(input$process)
+    # fibers <- isolate(input$fibers)
+    # geography <- isolate(input$geography)
+    # qualities <- isolate(input$qualities)
+    # inferredQualities <- isolate(input$inferredQualities)
+    # area <- isolate(input$zoomTo)
+    # table_update <- isolate(input$table_updateBtn)
+    # graph_update <- isolate(input$graph_updateBtn)
+    
+    data <- secondarydefinitions
+    
+    private_filter_by <- function(d, col, data_col){
+      if(length(col) != 0 && !is.null(col)){
+        d <- d %>%
+          filter(data_col %in% col)
+      }
+      return(d)
+      
+    }
+    
+    
+    # if(isolate(input$dataSet) != "Both"){
+    #   data <- private_filter_by(data,isolate(input$dataSet),data$company)
+    # }
+    data <- private_filter_by(data,isolate(input$textileName),data$textile_name)
+    # data <- filter_colors(data,isolate(input$colors))
+    # data <- private_filter_by(data,isolate(input$patterns),data$modifier:pattern)
+    # data <- private_filter_by(data,isolate(input$process),data$textile_process_arch)
+    # data <- private_filter_by(data,isolate(input$fibers),data$textile_fiber_arch)
+    # data <- private_filter_by(data,isolate(input$geography),data$textile_geography_arch)
+    # data <- private_filter_by(data,isolate(input$qualities),data$textile_quality_arch)
+    # data <- private_filter_by(data,isolate(input$inferredQualities),data$textile_quality_inferred)
+    # data <- private_filter_by(data,isolate(input$year),data[[return_yrColname(isolate(input$regionChoice))]])
+    # 
+    #browser()
+    
+    return (data)
+    
+    
+  })
   
+  # Codes for the fact sheet function - generate a fact sheet by extracting key words from definitions
+  # k=toString(secondarydefinitions,width = 0)
+  # colorsextracted=str_extract_all(k, "white|red|yellow|blue|brown|green|purple|gold")
+  # patternextracted=str_extract_all(k, "checkered|flowered|striped|")
+  # materialextracted=str_extract_all(k, "cotton-and-silk|cotton|silk|thread|dye|mordants|madder")
+  # #usageextracted=str_extract_all(k,"coats|lining")
+  # #qualityextracted=str_extract_all(k,"poor|coarse|medium|good|superior")
+  # 
+  # colorsextracted=unique(unlist(colorsextracted))
+  # patternextracted=unique(unlist(patternextracted))
+  # materialextracted=unique(unlist(materialextracted))
+  # usageextracted=unique(unlist(usageextracted))
+  # qualityextracted=unique(unlist(qualityextracted))
+  # 
+  # output$Textilename = renderText("Textile Chosen:")
+  # 
+  # output$nameextract = renderText(Input$name)
+  # 
+  # output$color = renderText("Colors:")
+  # output$colorsextracted=renderPrint(colorsextracted)
+  # 
+  # output$pattern = renderText("Patterns:")
+  # output$patternextracted=renderPrint(patternextracted)  
+  # 
+  # output$material = renderText("Materials:")
+  # output$materialextracted=renderPrint(materialextracted) 
+  # 
+  # output$usage = renderText("Usage:")
+  # output$usageextracted=renderPrint(usageextracted) 
+  # 
+  # output$quality = renderText("Quality:")
+  # output$qualityextracted=renderPrint(qualityextracted) 
+  
+  output$factsheet = renderDT({
+    #   input$table_updateBtn
+    #   #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
+    reactivedata1()})
+  
+  output$downloadData1 <- downloadHandler(
+    filename = function() {
+      paste(input$table_updateBtn, ".xls", sep = "")
+    },
+    content = function(file) {
+      write_excel_csv(
+        
+        #isolate(filter_by_inputs(joined.data.original,isolate(input)))
+        
+        reactive_data(), file)
+    }
+  )
   
   
   
@@ -290,6 +418,12 @@ server <- function(input, output, session) {
     if(isolate(input$dataSet) != "Both"){
       data <- private_filter_by(data,isolate(input$dataSet),data$company)
     }
+    if(isolate(input$regionChoice) == "Origin"){
+      data <- private_filter_by(data,isolate(input$regions),data$orig_loc_region_modern)
+    }
+    if(isolate(input$regionChoice) != "Origin"){
+      data <- private_filter_by(data,isolate(input$regions),data$dest_loc_modern)
+    }
     data <- private_filter_by(data,isolate(input$textileName),data$textile_name)
     data <- filter_colors(data,isolate(input$colors))
     data <- private_filter_by(data,isolate(input$patterns),data$textile_pattern_arch)
@@ -313,6 +447,15 @@ server <- function(input, output, session) {
                    label = "Choose textile(s) of interest",
                    choices = levels(factor(reactive_data()$textile_name)),
                    selected = input$textileName,
+                   multiple = TRUE)
+    
+  })
+  
+  output$Regions <- renderUI({
+    selectizeInput(inputId = "regions",
+                   label = "Choose region(s) of interest",
+                   choices = levels(factor(reactive_data()$orig_loc_region_modern)),
+                   selected = input$regions,
                    multiple = TRUE)
     
   })
@@ -447,7 +590,7 @@ server <- function(input, output, session) {
   
   
   #creates table
-  output$update_inputs <- renderDataTable(searchDelay = 1000,{
+  output$update_inputs <- renderDT({
     input$table_updateBtn
     #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
     reactive_data()})
@@ -526,127 +669,98 @@ server <- function(input, output, session) {
     input$updateBtn
     input$graph_updateBtn
     name <- input$countriesMap_shape_click$id
+    joined.data <- reactive_data()
     
-    #only want to do this if they clicked on a country
+    #Read in all of the inputs, but isolated
+    modifier <- isolate(input$pieChart)
+    dataSet <- isolate(input$dataSet)
+    regionChoice <- isolate(input$regionChoice)
+    textileName <- isolate(input$textileName)
+    colors <- isolate(input$colors)
+    patterns <- isolate(input$patterns)
+    process <- isolate(input$process)
+    fibers <- isolate(input$fibers)
+    geography <- isolate(input$geography)
+    qualities <- isolate(input$qualities)
+    inferredQualities <- isolate(input$inferredQualities)
+    
+    choice <- get_regionChoice(regionChoice) #get dest or orig
     if(length(name) != 0){
-      #Read in all of the inputs, but isolated
-      modifier <- isolate(input$pieChart)
-      dataSet <- isolate(input$dataSet)
-      regionChoice <- isolate(input$regionChoice)
-      textileName <- isolate(input$textileName)
-      colors <- isolate(input$colors)
-      patterns <- isolate(input$patterns)
-      process <- isolate(input$process)
-      fibers <- isolate(input$fibers)
-      geography <- isolate(input$geography)
-      qualities <- isolate(input$qualities)
-      inferredQualities <- isolate(input$inferredQualities)
-      
-      #Again, reusing the original data
-      #joined.data <- joined.data.original
-      
-      #Filter all the inputs
-      #joined.data <- isolate(filter_by_inputs(joined.data,isolate(input)))
-      
-      
-      joined.data <- reactive_data()
-      
-      choice <- get_regionChoice(regionChoice) #get dest or orig
-      
-      #We care specifically about the destination here
       pie.data <- joined.data %>%
-        filter(joined.data[choice] == name) %>%
-        select(textile_quantity,
-               deb_dec,
-               all_of(modifier),
-               company)
-      
-      
-      #   if(regionChoice == "Destination"){ #Only dest_country
-      #   pie.data <- joined.data %>%
-      #     filter(dest_country == name) %>%
-      #     select(textile_quantity,
-      #            deb_dec,
-      #            all_of(modifier),
-      #            company)
-      # }
-      # else { #Only orig_country
-      #   pie.data <- joined.data %>%
-      #     filter(orig_country == name) %>%
-      #     select(textile_quantity,
-      #            deb_dec,
-      #            all_of(modifier),
-      #            company)
-      # }
-      
-      #Omit na of the selected columns to avoid errors
-      if(input$omitNAs){
-        if (modifier == "colorList"){
+        filter(joined.data[choice] == name)
+    }
+    else{
+      pie.data <- joined.data}
+    
+    #We care specifically about the destination here
+    pie.data%>%
+      select(textile_quantity,
+             deb_dec,
+             all_of(modifier),
+             company)
+    
+    if(input$omitNAs){
+      if (modifier == "colorList"){
         pie.data <- pie.data %>%
           mutate(colorList = ifelse(colorList == "No color indicated",NA ,colorList))
-        }
-        pie.data <- pie.data %>%
-          na.omit()
       }
-      else{ #Fix a problem for if NA is the only data point
-        pie.data[3][is.na(pie.data[3])] <- "None indicated"
+      pie.data <- pie.data %>%
+        na.omit()
+    }
+    else{ #Fix a problem for if NA is the only data point
+      pie.data[3][is.na(pie.data[3])] <- "None indicated"
+    }
+    
+    if(dataSet != "Both"){ #Controlling for company selection
+      pie.data <- pie.data %>%
+        filter(company == dataSet)
+    }
+    
+    if(isolate(input$dataType) == "Quantity"){ #If they're interested in quantity
+      if(nrow(pie.data) != 0){ #check to see if there are values left to publish
+        pie.data %>% 
+          ggplot(aes(x="",
+                     y = textile_quantity)) +
+          geom_bar(stat="identity",
+                   width=1,
+                   aes_string(fill=modifier))+
+          coord_polar("y", start=0) + #This line in particular changes the bar chart to a pie chart
+          labs(x = NULL,
+               y = NULL,
+               fill = NULL) +
+          scale_fill_viridis(discrete = TRUE,
+                             name = paste(names(modVec)[modVec == modifier]),
+                             option = "magma") +
+          theme_void() +
+          ggtitle(label = paste(names(modVec)[modVec == modifier], "distribution for", name, "with these filters."))
       }
-      
-      if(dataSet != "Both"){ #Controlling for company selection
-        pie.data <- pie.data %>%
-          filter(company == dataSet)
-      }
-      
-      if(isolate(input$dataType) == "Quantity"){ #If they're interested in quantity
-        if(nrow(pie.data) != 0){ #check to see if there are values left to publish
-          pie.data %>% 
-            ggplot(aes(x="",
-                       y = textile_quantity)) +
-            geom_bar(stat="identity",
-                     width=1,
-                     aes_string(fill=modifier))+
-            coord_polar("y", start=0) + #This line in particular changes the bar chart to a pie chart
-            labs(x = NULL,
-                 y = NULL,
-                 fill = NULL) +
-            scale_fill_viridis(discrete = TRUE,
-                               name = paste(names(modVec)[modVec == modifier]),
-                              option = "magma") +
-            theme_void() +
-            ggtitle(label = paste(names(modVec)[modVec == modifier], "distribution for", name, "with these filters."))
-        }
-        else{ #No rows were found
-          ggplot() +
-            ggtitle(label = paste(name, " has no data for these filters and ", names(modVec)[modVec == modifier], ".", sep = ""))
-        }
-      }
-      else{ #This will do total value the same way, except graphing deb_dec
-        if(nrow(pie.data) != 0){
-          pie.data %>%
-            ggplot(aes(x="",
-                       y = deb_dec)) +
-            geom_bar(stat="identity",
-                     width=1,
-                     aes_string(fill=modifier))+
-            coord_polar("y", start=0) +
-            labs(x = NULL,
-                 y = NULL,
-                 fill = NULL) +
-            scale_fill_viridis(discrete = TRUE,
-                               name = paste(names(modVec)[modVec == modifier]),
-                               option = "magma") +
-            theme_void() +
-            ggtitle(label = paste(names(modVec)[modVec == modifier], "monetary distribution for", name, "with these filters."))
-        }
-        else{
-          ggplot() +
-            ggtitle(label = paste(name, " has no data for these filters and ", names(modVec)[modVec == modifier], ".", sep = ""))
-        }
+      else{ #No rows were found
+        ggplot() +
+          ggtitle(label = paste(name, " has no data for these filters and ", names(modVec)[modVec == modifier], ".", sep = ""))
       }
     }
-    else{ #This comes up if they have not clicked any countries
-      ggplot() +
-        ggtitle(label = "Select a country with data for these textiles in order to display a pie chart here.")
+    else{ #This will do total value the same way, except graphing deb_dec
+      if(nrow(pie.data) != 0){
+        pie.data %>%
+          ggplot(aes(x="",
+                     y = deb_dec)) +
+          geom_bar(stat="identity",
+                   width=1,
+                   aes_string(fill=modifier))+
+          coord_polar("y", start=0) +
+          labs(x = NULL,
+               y = NULL,
+               fill = NULL) +
+          scale_fill_viridis(discrete = TRUE,
+                             name = paste(names(modVec)[modVec == modifier]),
+                             option = "magma") +
+          theme_void() +
+          ggtitle(label = paste(names(modVec)[modVec == modifier], "monetary distribution for", name, "with these filters."))
+      }
+      else{
+        ggplot() +
+          ggtitle(label = paste(name, " has no data for these filters and ", names(modVec)[modVec == modifier], ".", sep = ""))
+      }
     }
   })
   
