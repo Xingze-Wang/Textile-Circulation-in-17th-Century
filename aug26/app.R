@@ -60,7 +60,9 @@ joined.data.original <- read_csv("joined.csv")
 
 joined.data.original1 <- read_csv("joined.csv")
 
-secondarydefinitions = read_excel("/Users/xingzewang/Downloads/TestFactSheetDefinitions.xlsx")
+secondarydefinitions = read_excel("TestFactSheetDefinitions.xlsx")
+
+
 #Data Cleaning - changed all the NA into 0 and "N/A"
 joined.data.original1[["orig_yr"]][is.na(joined.data.original1["orig_yr"])]=0
 joined.data.original1[["dest_yr"]][is.na(joined.data.original1["dest_yr"])]=0
@@ -806,77 +808,216 @@ server <- function(input, output, session) {
         }
     })
     
+    #' #Rendering the bar chart - this works nearly the exact same way as the pie chart
+    #' #except when it is graphing the outputs, it is doing so with a bar chart instead of a pie chart
+    #' ## Now the bar chart only shows up when clicking on a specific region
+    #' output$barChart <- renderPlot({
+    #'     input$updateBtn
+    #'     input$graph_updateBtn
+    #'     name <- input$countriesMap_shape_click$id
+    #'     
+    #'     joined.data = reactive_data()
+    #'     bar.data = joined.data
+    #'     
+    #'     # choice <- get_regionChoice(regionChoice) #get dest or orig
+    #'     # if(length(name) != 0){
+    #'     #     bar.data <- joined.data %>%
+    #'     #         filter(joined.data[choice] == name)
+    #'     # }
+    #'     # else{
+    #'     #     bar.data <- joined.data}
+    #'     
+    #'     
+    #'     #if(!is.null(name) && length(name) != 0){
+    #'     modifier <- isolate(input$barChart)
+    #'     #modifierObj <- paste("`", names(modVec)[modVec == modifier], "`", sep = "")
+    #'     #dataSet <- isolate(input$dataSet)
+    #'     dataType <- isolate(input$dataType)
+    #'     regionChoice <- isolate(input$regionChoice)
+    #'     textileName <- isolate(input$textileName)
+    #'     colors <- isolate(input$colors)
+    #'     patterns <- isolate(input$patterns)
+    #'     process <- isolate(input$process)
+    #'     fibers <- isolate(input$fibers)
+    #'     geography <- isolate(input$geography)
+    #'     qualities <- isolate(input$qualities)
+    #'     inferredQualities <- isolate(input$inferredQualities)
+    #'     #orig_yr <- isolate(input$orig_yr)
+    #'     year <- isolate(input$year)
+    #'     facet <- isolate(input$facet)
+    #'     #dest_yr <- isolate(input$dest_yr)
+    #'         
+    #'     values <- c()   
+    #'         
+    #'     values <- c(
+    #'         #'name' = name,
+    #'         'modifier' = modifier,
+    #'         #'modifierObj' = modifierObj,
+    #'         #'dataSet' = dataSet,
+    #'         'dataType'= dataType,
+    #'         'regionChoice' =  regionChoice ,
+    #'         'textileName' = textileName,
+    #'         'colors' = colors,
+    #'         'patterns' = patterns,
+    #'         'process' = process,
+    #'         'fibers' = fibers,
+    #'         'geography' = geography,
+    #'         'qualities' = qualities,
+    #'         'inferredQualities' = inferredQualities,
+    #'         #'orig_yr' = orig_yr,
+    #'         'year' = year,
+    #'         'facet' = facet
+    #'     )
+    #'         
+    #'         
+    #'     #joined.data <- joined.data.original
+    #'         
+    #'     #joined.data <- isolate(filter_by_inputs(joined.data,isolate(input)))
+    #' 
+    #'     
+    #'     if(!is.null(name) && length(name) != 0){
+    #'         if(regionChoice == "Destination"){
+    #'             bar.data <- bar.data %>%
+    #'                 filter(dest_country == name) %>%
+    #'                 select(textile_quantity,
+    #'                        deb_dec,
+    #'                        orig_yr,
+    #'                        dest_yr,
+    #'                        all_of(modifier),
+    #'                        company)
+    #'         }
+    #'         
+    #'         else{
+    #'             bar.data <- bar.data %>%
+    #'                 filter(orig_country == name) %>%
+    #'                 select(textile_quantity,
+    #'                        deb_dec,
+    #'                        orig_yr,
+    #'                        dest_yr,
+    #'                        all_of(modifier),
+    #'                        company)
+    #'         }
+    #'     }
+    #'     
+    #'     else{
+    #'         bar.data = reactive_data()
+    #'     }
+    #'              
+    #'         
+    #'     if(input$omitNAs){
+    #'         if (modifier == "colorList"){
+    #'             bar.data <- bar.data %>%
+    #'                 mutate(colorList = ifelse(colorList == "No color indicated",NA, colorList))
+    #'         }
+    #'             
+    #'         bar.data <- bar.data %>%
+    #'             na.omit()
+    #'             
+    #'     }
+    #'     else{
+    #'         bar.data[4][is.na(bar.data[4])] <- "None indicated"
+    #'     }
+    #'         
+    #'     # if(isolate(input$dataSet) == "West India Company (WIC)"){
+    #'     #     bar.data <- bar.data %>% filter(company == "WIC")
+    #'     # }
+    #'     # if(isolate(input$dataSet) == "East India Company (VOC)"){
+    #'     #     bar.data <- bar.data %>% filter(company == "VOC")
+    #'     # }
+    #'         
+    #'         
+    #'     #ggplotly
+    #'     createBarChart(bar.data,values)
+    #'     
+    #'     
+    #'     # ggplot(reactive_data(), aes(x=textile_name, y=modifier)) + geom_bar(stat="identity") + 
+    #'     #     labs(x="Orig_yr", y=modifier)
+    #'     #     
+    #'     #}
+    #'     # else{
+    #'     #     ggplot() +
+    #'     #         ggtitle(label = paste("No data for these filters."))
+    #'     #     
+    #'     #     
+    #'     # }
+    #'     
+    #' })
+    #' 
     #Rendering the bar chart - this works nearly the exact same way as the pie chart
     #except when it is graphing the outputs, it is doing so with a bar chart instead of a pie chart
-    ## Now the bar chart only shows up when clicking on a specific region
     output$barChart <- renderPlot({
         input$updateBtn
         input$graph_updateBtn
         name <- input$countriesMap_shape_click$id
         
-        joined.data = reactive_data()
-        bar.data = joined.data
-        
-        # choice <- get_regionChoice(regionChoice) #get dest or orig
-        # if(length(name) != 0){
-        #     bar.data <- joined.data %>%
-        #         filter(joined.data[choice] == name)
-        # }
-        # else{
-        #     bar.data <- joined.data}
+        values <- c()
         
         
-        #if(!is.null(name) && length(name) != 0){
-        modifier <- isolate(input$barChart)
-        #modifierObj <- paste("`", names(modVec)[modVec == modifier], "`", sep = "")
-        dataSet <- isolate(input$dataSet)
-        dataType <- isolate(input$dataType)
-        regionChoice <- isolate(input$regionChoice)
-        textileName <- isolate(input$textileName)
-        colors <- isolate(input$colors)
-        patterns <- isolate(input$patterns)
-        process <- isolate(input$process)
-        fibers <- isolate(input$fibers)
-        geography <- isolate(input$geography)
-        qualities <- isolate(input$qualities)
-        inferredQualities <- isolate(input$inferredQualities)
-        #orig_yr <- isolate(input$orig_yr)
-        year <- isolate(input$year)
-        facet <- isolate(input$facet)
-        #dest_yr <- isolate(input$dest_yr)
-            
-        values <- c()   
-            
-        values <- c(
-            #'name' = name,
-            'modifier' = modifier,
-            #'modifierObj' = modifierObj,
-            'dataSet' = dataSet,
-            'dataType'= dataType,
-            'regionChoice' =  regionChoice ,
-            'textileName' = textileName,
-            'colors' = colors,
-            'patterns' = patterns,
-            'process' = process,
-            'fibers' = fibers,
-            'geography' = geography,
-            'qualities' = qualities,
-            'inferredQualities' = inferredQualities,
-            #'orig_yr' = orig_yr,
-            'year' = year,
-            'facet' = facet
-                
-        )
-            
-            
-        #joined.data <- joined.data.original
-            
-        #joined.data <- isolate(filter_by_inputs(joined.data,isolate(input)))
-    
+        joined.data <- reactive_data()
+        
         
         if(!is.null(name) && length(name) != 0){
+            modifier <- isolate(input$barChart)
+            modifierObj <- paste("`", names(modVec)[modVec == modifier], "`", sep = "")
+            #dataSet <- isolate(input$dataSet)
+            if(isolate(input$dataSet)=="West India Company (WIC)"){
+                dataSet = "WIC"
+            }
+            if(isolate(input$dataSet)=="East India Company (VOC)"){
+                dataSet = "VOC"
+            }
+            if(isolate(input$dataSet)=="Both"){
+                dataSet="Both"
+            }
+            dataType <- isolate(input$dataType)
+            regionChoice <- isolate(input$regionChoice)
+            textileName <- isolate(input$textileName)
+            colors <- isolate(input$colors)
+            patterns <- isolate(input$patterns)
+            process <- isolate(input$process)
+            fibers <- isolate(input$fibers)
+            geography <- isolate(input$geography)
+            qualities <- isolate(input$qualities)
+            inferredQualities <- isolate(input$inferredQualities)
+            #orig_yr <- isolate(input$orig_yr)
+            year <- isolate(input$year)
+            facet <- isolate(input$facet)
+            #dest_yr <- isolate(input$dest_yr)
+            
+            
+            
+            values <- c(
+                'name' = name,
+                'modifier' = modifier,
+                'modifierObj' = modifierObj,
+                'dataSet' = dataSet,
+                'dataType'= dataType,
+                'regionChoice' =  regionChoice ,
+                'textileName' = textileName,
+                'colors' = colors,
+                'patterns' = patterns,
+                'process' = process,
+                'fibers' = fibers,
+                'geography' = geography,
+                'qualities' = qualities,
+                'inferredQualities' = inferredQualities,
+                #'orig_yr' = orig_yr,
+                'year' = year,
+                'facet' = facet
+                
+            )
+            
+            
+            
+            #joined.data <- joined.data.original
+            
+            #joined.data <- isolate(filter_by_inputs(joined.data,isolate(input)))
+            
+            
             if(regionChoice == "Destination"){
-                bar.data <- bar.data %>%
+                
+                bar.data <- joined.data %>%
+                    
                     filter(dest_country == name) %>%
                     select(textile_quantity,
                            deb_dec,
@@ -885,9 +1026,8 @@ server <- function(input, output, session) {
                            all_of(modifier),
                            company)
             }
-            
             else{
-                bar.data <- bar.data %>%
+                bar.data <- joined.data %>%
                     filter(orig_country == name) %>%
                     select(textile_quantity,
                            deb_dec,
@@ -896,46 +1036,38 @@ server <- function(input, output, session) {
                            all_of(modifier),
                            company)
             }
-        }
-        
-        else{
-            bar.data = reactive_data()
-        }
-                 
             
-        if(input$omitNAs){
-            if (modifier == "colorList"){
+            if(input$omitNAs){
+                if (modifier == "colorList"){
+                    bar.data <- bar.data %>%
+                        mutate(colorList = ifelse(colorList == "No color indicated",NA, colorList))
+                }
+                
                 bar.data <- bar.data %>%
-                    mutate(colorList = ifelse(colorList == "No color indicated",NA, colorList))
+                    na.omit()
+                
+                
             }
-                
-            bar.data <- bar.data %>%
-                na.omit()
-                
+            else{
+                bar.data[4][is.na(bar.data[4])] <- "None indicated"
+            }
+            
+            if(dataSet != "Both"){
+                bar.data <- bar.data %>%
+                    filter(company == dataSet)
+            }
+            
+            #ggplotly
+            createBarChart(bar.data,values)
+            
+            
         }
         else{
-            bar.data[4][is.na(bar.data[4])] <- "None indicated"
+            ggplot() +
+                ggtitle(label = paste("No data for these filters."))
+            
+            
         }
-            
-        if(isolate(input$dataSet) == "West India Company (WIC)"){
-            bar.data <- bar.data %>% filter(company == "WIC")
-        }
-        if(isolate(input$dataSet) == "East India Company (VOC)"){
-            bar.data <- bar.data %>% filter(company == "VOC")
-        }
-            
-            
-        #ggplotly
-        createBarChart(bar.data,values)
-            
-            
-        #}
-        # else{
-        #     ggplot() +
-        #         ggtitle(label = paste("No data for these filters."))
-        #     
-        #     
-        # }
         
     })
 }
