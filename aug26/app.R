@@ -6,11 +6,12 @@
 
 ## Xingze Wang's summer changes included
 
-
+install.packages("kableExtra")
 
 
 #Project initial
 library(DT)
+library(kableExtra)
 library(shiny)
 library(shinythemes)
 library(readxl)
@@ -630,7 +631,9 @@ server <- function(input, output, session) {
     output$update_inputs <- renderDT({
         input$table_updateBtn
         #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
-        reactive_data()})
+        reactive_data()
+        hover = TRUE
+        })
     
     # Downloadable .xls of table dataset
     output$downloadData <- downloadHandler(
@@ -1063,12 +1066,12 @@ server <- function(input, output, session) {
             
         }
         else{
-            ggplot() +
-                ggtitle(label = paste("No data for these filters."))
+            # ggplot() +
+            #     ggtitle(label = paste("No data for these filters."))
             
-            
+
         }
-        
+         
     })
 }
 
