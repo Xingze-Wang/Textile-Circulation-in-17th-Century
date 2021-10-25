@@ -5,7 +5,7 @@
 # Code maintained and extended by Nicholas Sliter
 
 ## Xingze Wang's summer changes included
-
+## Demo Version
 
 
 
@@ -220,12 +220,6 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                     #          p("The app that we designed is an interactive map focused on the trade of textiles from 1710 to 1715. The Map Explorer allows the user to choose a company and data type of interest, while filtering by textile modifiers, and displays an interactive world map with a complementary pie chart and bar chart when a specific country is selected. The Table Explorer displays the compiled and cleaned dataset."),
                     #          p("The information presented within this app is messy historical data transcribed from invoices and ledgers that is currently part of a larger ongoing research project investigating interconnected patterns of textile trade in the VOC and WIC. Many of the textile names and types are now obsolete and at present have been cleaned and grouped to the best of our ability using secondary source materials. Historically, the Dutch used the tripartite format of Holland guilders as their currency. Using the debkeepr package developed by Dr. Jesse Sadler, a historian of early modern Europe from Virginia Tech, the currency values are converted in a decimal format for ease of visualization. Uncertainty still remains between differences between Dutch and Indian guilders and unit discrepancies. For the WIC dataset, one piece is equal to one ell (~ 27 inches), but for the VOC dataset this relationship varies."),
                     # ),
-                    tabPanel(title = "Secondary Sources",
-                             checkboxInput(inputId = "rownames1",
-                                         label = "Show Rownames"),
-                             dataTableOutput('factsheet'),
-                             downloadButton("downloadData1", "Download Table")
-                    ),
                     tabPanel(title = "Data Visualization and Interactive Map",
                              leafletOutput(outputId = "countriesMap"),
                              plotOutput(outputId = "pieChart"),
@@ -236,7 +230,18 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                                            label = "Show Rownames"),
                              dataTableOutput('update_inputs'),
                              downloadButton("downloadData", "Download Table") #download button
+                    ),
+                    tabPanel(title = "Secondary Sources",
+                             checkboxInput(inputId = "rownames1",
+                                           label = "Show Rownames"),
+                             dataTableOutput('factsheet'),
+                             downloadButton("downloadData1", "Download Table")
                     )
+                    
+                    ##unwanted functions
+                    
+                    # tabPanel(title = "comparison",
+                    #          dataTableOutput('effects'))
                     # tabPanel(title = "Suggested Reading",
                     #          h3("Data Sources (compiled by Marsely Kehoe and Carrie Anderson):"),
                     #          h5("Nationaal Archief, West India Company Archive, nrs. 1290-1296."),

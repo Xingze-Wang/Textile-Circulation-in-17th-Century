@@ -71,17 +71,33 @@ joined.data.original1$textile_name[joined.data.original1$textile_name=="Tannyzij
 
 #changing textile quality (eng)
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="grof (rough, coarse?)"]<-"coarse"
-joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="gemeen (common), grof (rough, coarse?)"]<-"common,coarse"
+joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="gemeen (common), grof (rough, coarse?)"]<-"common, coarse"
 
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="fijn (fine)"]<-"fine"
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="geraffineerd (refined)"]<-"fine"
 
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="dicht geweven (thick/dense woven?)"]<-"heavy"
-joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="dicht (thick/dense woven?), fijn (fine)"]<-"heavy,fine"
+joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="dicht (thick/dense woven?), fijn (fine)"]<-"heavy, fine"
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="zwaar (heavy/thick)"]<-"heavy"
 
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="gemeen (common)"]<-"ordinary"
 joined.data.original1$textile_quality_eng[joined.data.original1$textile_quality_eng=="ordinaris (ordinary)"]<-"ordinary"
+
+#taking out the guessing columns
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="grof (rough, coarse?)"]<-"grof"
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="gemeen (common), grof (rough, coarse?)"]<-"gemeen, grof"
+
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="fijn (fine)"]<-"fijn"
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="geraffineerd (refined)"]<-"geraffineerd"
+
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="dicht geweven (thick/dense woven?)"]<-"dicht geweven"
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="dicht (thick/dense woven?), fijn (fine)"]<-"dicht, fijn"
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="zwaar (heavy/thick)"]<-"zwaar"
+
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="gemeen (common)"]<-"gemeen"
+joined.data.original1$textile_quality_arch[joined.data.original1$textile_quality_arch=="ordinaris (ordinary)"]<-"ordinaris"
+
+
 
 joined.data.original = joined.data.original1
 
@@ -447,7 +463,7 @@ server <- function(input, output, session) {
     
     selectizeInput(inputId = "qualities",
                    label = "Select one or more quality(s) of interest",
-                   choices = user_choices,
+                   choices = joined.data$textile_quality_eng,
                    selected = input$qualities,
                    multiple = TRUE)
     
@@ -477,20 +493,32 @@ server <- function(input, output, session) {
   
   
   #creates table
+  
+  ##This creates the interative table with extensions responsive to the length of the page
+  
+  # output$update_inputs <- renderDT({
+  #   input$table_updateBtn
+  #   #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
+  #   reactive_data()%>%
+  #     datatable(rownames= input$rownames2,
+  #               extensions = "Responsive")
+  #   #hover = TRUE
+  #   #striped = TRUE
+  #   })
+  
+  #just a comparison group to show the different DT
   output$update_inputs <- renderDT({
     input$table_updateBtn
     #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
     reactive_data()%>%
-      datatable(rownames= input$rownames2,
-                extensions = "Responsive")
-    #hover = TRUE
-    #striped = TRUE
-    })
+         datatable(rownames= input$rownames2)
+  })
+  
   
   # Downloadable .xls of table dataset
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste(input$table_updateBtn, ".xls", sep = "")
+      paste(input$table_updateBtn, "data.xls", sep = "")
     },
     content = function(file) {
       write_excel_csv(

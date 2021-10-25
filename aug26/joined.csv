@@ -102,7 +102,7 @@
 101,WIC,Ship: Emmenes,1714,Texel,Netherlands,53.053921,4.79605,1714,Ouidah,Benin,6.3601,2.08266,20,ps.,20,NA,NA,Graaties,white,NA,NA,NA,NA,NA,NA,Mid-range,7,135,WIC_101,white,white,Netherlands,Benin
 102,WIC,Ship: Acredam,1714,Texel,Netherlands,53.053921,4.79605,1715,Ardra,Benin,6.47216,2.62652,43,ps.,43,NA,NA,Graaties,NA,NA,NA,NA,NA,NA,NA,Mid-range,8,344,WIC_102,No color indicated,No color indicated,Netherlands,Benin
 103,WIC,Ship: St Clara 2,1710,Texel,Netherlands,53.053921,4.79605,1710,Ouidah,Benin,6.3601,2.08266,100,ps.,100,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Expensive,20,2000,WIC_103,blue,blue-green,Netherlands,Benin
-104,WIC,Ship: Johanna Machteld,1710,Texel,Netherlands,53.053921,4.79605,1711,Loanda,Angola,-8.838333,13.234444,50,pieces,50,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Inexpensive,1,15,WIC_104,blue,blue-green,Netherlands,Angola
+104,WIC,Ship: Johanna Machteld,1710,Texel,Netherlands,53.053921,4.79605,1711,Loanda,Angola,-8.838333,13.234444,50,pieces,50,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Expensive,1,968.15,WIC_104,blue,blue-green,Netherlands,Angola
 105,WIC,Ship: Johanna Machteld,1710,Texel,Netherlands,53.053921,4.79605,1711,Loanda,Angola,-8.838333,13.234444,400,pieces,400,NA,NA,Guinees,brown-blue,NA,NA,NA,NA,NA,NA,Expensive,20,7750,WIC_105,"blue, brown",blue-green,Netherlands,Angola
 106,WIC,Ship: Eva Maria 2,1712,Vlissingen,Netherlands,51.455681,3.57649,1712,Elmina,Ghana,5.0847,-1.35093,83,ps.,83,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Expensive,22,1759.6,WIC_106,blue,blue-green,Netherlands,Ghana
 107,WIC,Ship: Bosbeek,1712,Texel,Netherlands,53.053921,4.79605,NA,Elmina,Ghana,5.0847,-1.35093,82,ps.,82,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Expensive,20,1640,WIC_107,blue,blue-green,Netherlands,Ghana
@@ -114,7 +114,7 @@
 113,WIC,Ship: Emmenes,1714,Texel,Netherlands,53.053921,4.79605,1714,Ouidah,Benin,6.3601,2.08266,200,ps.,200,NA,NA,Guinees,brown-blue,NA,NA,NA,NA,NA,NA,Expensive,25,4900,WIC_113,"blue, brown",blue-green,Netherlands,Benin
 114,WIC,Ship: Bosbeek,1715,Texel,Netherlands,53.053921,4.79605,1715,Loanda,Angola,-8.838333,13.234444,100,ps.,100,NA,NA,Guinees,NA,NA,NA,NA,Inlandse,NA,NA,Expensive,30,2920,WIC_114,No color indicated,No color indicated,Netherlands,Angola
 115,WIC,Ship: Nieuwe Post,1715,Texel,Netherlands,53.053921,4.79605,1715,Loanda,Angola,-8.838333,13.234444,420,ps.,420,NA,NA,Guinees,blue,NA,NA,NA,NA,NA,NA,Expensive,31,13020,WIC_115,blue,blue-green,Netherlands,Angola
-116,WIC,Ship: Nieuwe Post,1715,Texel,Netherlands,53.053921,4.79605,1715,Loanda,Angola,-8.838333,13.234444,100,ps.,100,NA,NA,Guinees,NA,NA,NA,NA,NA,NA,NA,Inexpensive,3,220,WIC_116,No color indicated,No color indicated,Netherlands,Angola
+116,WIC,Ship: Nieuwe Post,1715,Texel,Netherlands,53.053921,4.79605,1715,Loanda,Angola,-8.838333,13.234444,100,ps.,100,NA,NA,Guinee Clothes,NA,NA,NA,NA,NA,NA,NA,Inexpensive,3,220,WIC_116,No color indicated,No color indicated,Netherlands,Angola
 117,WIC,Ship: St Clara 2,1710,Texel,Netherlands,53.053921,4.79605,1710,Ouidah,Benin,6.3601,2.08266,180,ps.,180,NA,NA,Kannekyns,NA,NA,NA,NA,NA,NA,NA,Inexpensive,2,324,WIC_117,No color indicated,No color indicated,Netherlands,Benin
 118,WIC,Ship: Johanna Machteld,1710,Texel,Netherlands,53.053921,4.79605,1711,Loanda,Angola,-8.838333,13.234444,80,ells,80,NA,NA,Laken,blue,NA,NA,NA,NA,NA,NA,Mid-range,4,320,WIC_118,blue,blue-green,Netherlands,Angola
 119,WIC,Ship: Johanna Machteld,1710,Texel,Netherlands,53.053921,4.79605,1711,Loanda,Angola,-8.838333,13.234444,74,ells,74,NA,NA,Laken,red,NA,NA,NA,NA,NA,NA,Mid-range,5,315,WIC_119,red,red,Netherlands,Angola

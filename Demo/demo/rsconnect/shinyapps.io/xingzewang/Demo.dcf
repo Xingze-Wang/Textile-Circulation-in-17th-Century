@@ -1,0 +1,13 @@
+name: Demo
+title: Demo
+username:
+account: xingzewang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4752187
+bundleId: 5081618
+url: https://xingzewang.shinyapps.io/Demo/
+when: 1632849756.45456
+lastSyncTime: 1632849756.45458
+asMultiple: FALSE
+asStatic: FALSE

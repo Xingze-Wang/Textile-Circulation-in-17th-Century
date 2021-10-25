@@ -5,9 +5,9 @@ account: xingzewang
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4577681
-bundleId: 5009621
+bundleId: 5081578
 url: https://xingzewang.shinyapps.io/textiledatavisualization/
-when: 1631044205.54181
-lastSyncTime: 1631044205.54183
+when: 1632849037.27777
+lastSyncTime: 1632849037.27779
 asMultiple: FALSE
 asStatic: FALSE
