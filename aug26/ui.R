@@ -124,7 +124,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                   radioButtons(inputId = "regionChoice",
                                label = "Select one",
                                choices = c("Origin", "Destination"),
-                               selected = "Origin"),
+                               selected = "Destination"),
                   
                   selectizeInput(inputId = "zoomTo",
                                  label = "Zoom to:",

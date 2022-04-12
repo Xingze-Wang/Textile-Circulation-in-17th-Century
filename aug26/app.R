@@ -4,7 +4,7 @@
 # Under the instruction of Prof. Carrie Anderson at Middlebury College
 # Code maintained and extended by Nicholas Sliter
 
-## Xingze Wang's summer changes included
+# Code and Dataset maintained and extended by Xingze Wang
 
 install.packages("kableExtra")
 
