@@ -3,13 +3,15 @@
 # Originally authored by Ev Berger-Wolf, Camryn Kluetmeier, Jason Rickenbacker, and Nicholas Sliter
 # Under the instruction of Prof. Carrie Anderson at Middlebury College
 # Code maintained and extended by Nicholas Sliter
-
 # Code and Dataset maintained and extended by Xingze Wang
+# Code maintained and extended by Sanjana Roy
 
+
+# Installing Packages 
 install.packages("kableExtra")
 
 
-#Project initial
+#Loading Libraries
 library(DT)
 library(kableExtra)
 library(shiny)
@@ -37,17 +39,16 @@ CONSTANTS <- c(
     
     "SHINY_THEME" = "sandstone",
     "COLOR_THEME" = "magma",
+    
+    ## What does COLORS do? ##
     "COLORS" = toString(c("white","yellow","red","blue","purple","green","black", "brown", "grey", "silver", "gold"))
-    
-    
-    
-)
+    #> strsplit((CONSTANTS["COLORS"]), ",")[[1]]
+    )
 
 
-#> strsplit((CONSTANTS["COLORS"]), ",")[[1]]
+#### CREATE ZOOM LOCATIONS #### 
 
-
-# Create zoom locations
+## This has to be modified to fit the location properly ##
 latLongZoom.original <- data.frame("Area" = c("World", "Europe", "Africa",
                                               "Middle East", "Pacfic Islands", "Asia"),
                                    "Lat" = c(30, 49.8, -6, 27, 0, 32),
@@ -56,47 +57,24 @@ latLongZoom.original <- data.frame("Area" = c("World", "Europe", "Africa",
 
 latLongZoom <- latLongZoom.original
 
-#Read in the data
-joined.data.original <- read_csv("joined.csv")
-
-joined.data.original1 <- read_csv("joined.csv")
-
-secondarydefinitions = read_excel("TestFactSheetDefinitions.xlsx")
 
 
-#Data Cleaning - changed all the NA into 0 and "N/A"
-joined.data.original1[["orig_yr"]][is.na(joined.data.original1["orig_yr"])]=0
-joined.data.original1[["dest_yr"]][is.na(joined.data.original1["dest_yr"])]=0
-joined.data.original1[["textile_quantity"]][is.na(joined.data.original1["textile_quantity"])]=0
-joined.data.original1[["quant_ells"]][is.na(joined.data.original1["quant_ells"])]=0
-joined.data.original1[["units_ells"]][is.na(joined.data.original1["units_ells"])]=0
-joined.data.original1[["value_per_piece"]][is.na(joined.data.original1["value_per_piece"])]=0
-joined.data.original1[is.na(joined.data.original1)]="N/A"
+#### READING IN DATA#### 
 
-#changing textile names
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Kannekijns"]<-"Kannekyns"
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Carroots"]<-"Corroots"
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Pattamaroepoe"]<-"Pattamaraphoe"
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Nicanees"]<-"Nickanees"
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Deken"]<-"Dekens"
-joined.data.original1$textile_name[joined.data.original1$textile_name=="Tannyzijde"]<-"Tannazijde"
-joined.data.original <- joined.data.original1
-
-map.data.original <- readOGR("filteredCountries.GeoJSON")
-
-#make copies of original data
+#Read in textile data
+joined.data.original <- read_csv("textileData.csv")
+#Making a second copy
+joined.data.original1 <- read_csv("textileData.csv")
+#Make copies of original data
 joined.data <- joined.data.original
 
-#convert JSON col to nonJSON
-#joined.data <- joined.data.original %>% mutate(colorList = vec_unflatten(colorList))
-
-
-#Fix Facet Wrapping Issue (deal with this after presentation)
-#joined.data$textile_quality_inferred <- factor(joined.data$textile_quality_inferred,
-#                                              levels = c("Inexpensive", "Mid-Range", "Expensive"))
+# Read in map data
+map.data.original <- readOGR("filteredCountries.GeoJSON")
+# Making copy of map data
 map.data <- map.data.original
 
 #Creating a modifier choice vector
+# for pie and bar chart
 modVec <- c("Textile Name" = "textile_name",
             #"Color" = "colorGroup",
             "Color" = "colorList",
@@ -107,25 +85,37 @@ modVec <- c("Textile Name" = "textile_name",
             "Geography" = "textile_geography_arch",
             "Quality" = "textile_quality_arch")
 
+#Fix Facet Wrapping Issue (deal with this after presentation)
 
-#Creating the UI
+#### CREATING THE UI #### 
+
 ui <- fluidPage(theme = shinytheme("sandstone"),
                 titlePanel("Interactive Textile Circulation Explorer"),
-                sidebarPanel(#All inputs will go in this sidebarPanel
-                    #h4("Explore different facets of the data by selecting inputs below:"),
+                
+                #### SIDEBAR PANEL ####
+                
+                sidebarPanel(  #All inputs will go in this sidebarPanel
+                    h4("Explore different facets of the data by selecting inputs below:"),
+                    
+                    #Selecting dataset
                     radioButtons(inputId = "dataSet",
-                                 label = "Select one or more company of interest",
+                                 label = "Select one or more company of interest:",
                                  choices = c("West India Company (WIC)", "East India Company (VOC)", "Both"),
                                  selected = "West India Company (WIC)"),
-                    radioButtons(inputId = "dataType",
-                                 label = "Select one data type of interest",
+                   
+                    #Selecting Quantity or Value data to show on map
+                     radioButtons(inputId = "dataType",
+                                 label = "Select one data type of interest:",
                                  choices = c("Quantity", "Value"),
                                  selected = "Quantity"),
+                    
+                    #Selecting Origin or Destination
                     radioButtons(inputId = "regionChoice",
-                                 label = "Select one",
+                                 label = "Select one:",
                                  choices = c("Origin", "Destination"),
                                  selected = "Origin"),
                     
+                    #Selection to zoom to a region
                     selectizeInput(inputId = "zoomTo",
                                    label = "Zoom to:",
                                    choices = levels(factor(latLongZoom$Area)),
@@ -145,22 +135,7 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                     #                  strsplit(CONSTANTS['COLORS'], ", ")[[1]]
                     #                  
                     #                  },
-                    
-                    
-                    
                     #               multiple = TRUE),
-                    uiOutput(outputId = "TextileName"),
-                    uiOutput(outputId = "Origins"),
-                    uiOutput(outputId = "Destinations"),
-                    uiOutput(outputId = "Colors"),
-                    uiOutput(outputId = "Pattern"),
-                    uiOutput(outputId = "Process"),
-                    uiOutput(outputId = "Fibers"),
-                    uiOutput(outputId = "InferredQualities"),
-                    uiOutput(outputId = "Geography"),
-                    uiOutput(outputId = "Qualities"),
-                    uiOutput(outputId = "Year"),
-                    
                     # selectizeInput(inputId = "patterns",
                     #                label = "Choose pattern(s) of interest",
                     #                choices = levels(factor(joined.data$textile_pattern_arch)),
@@ -189,10 +164,28 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                     #                label = "Year:",
                     #                choices = levels(factor(c(joined.data$orig_yr,joined.data$dest_yr))),
                     #                multiple = TRUE),
+                    
+                    
+                    # For rendering UI later
+                    uiOutput(outputId = "TextileName"),
+                    uiOutput(outputId = "Origins"),
+                    uiOutput(outputId = "Destinations"),
+                    uiOutput(outputId = "Colors"),
+                    uiOutput(outputId = "Pattern"),
+                    uiOutput(outputId = "Process"),
+                    uiOutput(outputId = "Fibers"),
+                    uiOutput(outputId = "InferredQualities"),
+                    uiOutput(outputId = "Geography"),
+                    uiOutput(outputId = "Qualities"),
+                    uiOutput(outputId = "Year"),
+                    
+                    
                     actionButton(inputId = "updateBtn",
                                  label = "Click to update map and tables!"),
                     br(), br(),
-                    br(), br(), #The inputs for the pie chart and bar chart
+                    br(), br(), 
+                    
+                    #Input selections for the pie chart and bar chart
                     selectInput(inputId = "pieChart",
                                 label = "Select a modifier for the pie chart:",
                                 choices = modVec,
@@ -208,8 +201,13 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                     actionButton(inputId = 'graph_updateBtn',
                                  label = 'Click to update graphs!')
                 ),
+                
+                
+                #### MAIN PANEL ####
+                
                 mainPanel(
-                    tabsetPanel(#All of the outputs go here (introduction, map/graphs, data tables, sources)
+                    tabsetPanel(
+                        #All of the outputs go here (introduction, map/graphs, data tables, sources)
                         # tabPanel(title= "Introduction",
                         #          h2("Dutch Textile Trade from 1710 to 1715", align = "center"),
                         #          img(src = "HARC_textiles.png", height = 350, width = 550, style="display: block; margin-left: auto; margin-right: auto;"),
@@ -220,64 +218,29 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
                         #          p("The app that we designed is an interactive map focused on the trade of textiles from 1710 to 1715. The Map Explorer allows the user to choose a company and data type of interest, while filtering by textile modifiers, and displays an interactive world map with a complementary pie chart and bar chart when a specific country is selected. The Table Explorer displays the compiled and cleaned dataset."),
                         #          p("The information presented within this app is messy historical data transcribed from invoices and ledgers that is currently part of a larger ongoing research project investigating interconnected patterns of textile trade in the VOC and WIC. Many of the textile names and types are now obsolete and at present have been cleaned and grouped to the best of our ability using secondary source materials. Historically, the Dutch used the tripartite format of Holland guilders as their currency. Using the debkeepr package developed by Dr. Jesse Sadler, a historian of early modern Europe from Virginia Tech, the currency values are converted in a decimal format for ease of visualization. Uncertainty still remains between differences between Dutch and Indian guilders and unit discrepancies. For the WIC dataset, one piece is equal to one ell (~ 27 inches), but for the VOC dataset this relationship varies."),
                         # ),
-                        tabPanel(title = "Secondary Sources",
-                                 dataTableOutput('factsheet'),
-                                 downloadButton("downloadData1", "Download Table")
-                        ),
                         tabPanel(title = "Data Visualization and Interactive Map",
                                  leafletOutput(outputId = "countriesMap"),
                                  plotOutput(outputId = "pieChart"),
-                                 plotOutput(outputId = "barChart") #outputId = 
+                                 plotOutput(outputId = "barChart") 
                         ),
                         tabPanel(title = "Data - Catalog",
                                  dataTableOutput('update_inputs'),
                                  downloadButton("downloadData", "Download Table") #download button
                         )
-                        # tabPanel(title = "Suggested Reading",
-                        #          h3("Data Sources (compiled by Marsely Kehoe and Carrie Anderson):"),
-                        #          h5("Nationaal Archief, West India Company Archive, nrs. 1290-1296."),
-                        #          h5("Huygens ING. Bookkeep-General Batavia/Boekhouder-Generaal Batavia."),
-                        #          a("https://bgb.huygens.knaw.nl"),
-                        #          h3("Suggested Reading:"),
-                        #          h5("Alpern, Stanley B. “What Africans Got for Their Slaves: A Master List of European Goods,” History in Africa, 22 (1995): 5-43."),
-                        #          h5("Bruijn, J. R., F. S. Gaastra, and I. Schöffer, with assistance from A. C. J. Vermeulen. Dutch-Asiatic Shipping in the 17th and 18th Centuries. The Hague: Martinus Nijhoff, 1987. Hexham, Henry. Het groot woorden-boeck: gestelt in 't Nederduytsch, end in 't Englisch. Rotterdam: Amount Leers, 1648."),
-                        #          h5("Chaudhuri, K. N. The Trading World of Asia and the East India Company, 1660-1760. Cambridge: Cambridge University Press, 1978)."),
-                        #          h5("Crill, Rosemary, ed. Textiles from India: The Global Trade. Papers presented at a conference on the Indian textile trade, Kolkata, 12-14 Oct. 2003. Calcutta: Seagull Books, 2006."),
-                        #          h5("Crill, Rosemary, ed. The Fabric of India. London: Victoria and Albert Publishing, 2015."),
-                        #          h5("Fotheringham, Avalon. The Indian Textiles Sourcebook: Patterns and Techniques. London: Thames and Hudson and Victoria and Albert Museum: 2019."),
-                        #          h5("Gillow, John and Nicholas Barnard. Traditional Indian Textiles. London: Thames and Hudson, 1991."),
-                        #          h5("Hartkamp-Jonxis, Ebeltje, ed. Sits: Oost-West Relatie in Textiel. Zwolle: Uitgeverij Waanders, 1987. (Hartkamp-Jonxis 1987, p. )"),
-                        #          h5("Hexham, Henry. Het groot woorden-boeck: gestelt in 't Nederduytsch, end in 't Engelsch. Rotterdam: Arnout Leers, 1648. "),
-                        #          h5("Instituut voor Nederlandse Geschiedenis, VOC-Glossarium. Verklaringen van termen, verzameld uit de Rijks geschiedkundige publicatiën die betrekking hebben op the Verenigde Oost-Indische Compagnie. The Hague: Institute voor Nederlandse Geschiedenis, 2000. "),
-                        #          h5("Irwin, John and P. R. Schwartz, Studies in Indo-European Textile History (Ahmedabad India: Calico Museum of Textile, 1966)."),
-                        #          h5("Jain, Rahul. Rapture: the art of Indian textiles. New Delhi: Niyogi Books, 2011."),
-                        #          h5("Jones, Adam, ed. West Africa in the mid-seventeenth century: an anonymous Dutch manuscript. African Studies Association Press, 1995."),
-                        #          h5("Oliver, Liza. Art, Trade, and Imperialism in Early Modern French India. Amsterdam: Amsterdam University Press, 2019."),
-                        #          h5("Peck, Amelia, ed. Interwoven Globe: The Worldwide Textile Trade, 1500-1800 (New York: Metropolitan Museum of Art, 2013). exh. cat."),
-                        #          h5("Ratelband, K., ed. Vijf Dagregisters van het kasteel São Jorge da Mina (Elmina) aan de Goudkust (1645-1647). The Hague: Martinus Nijhoff, 1953. (Ratelband 1953, p. cix)"),
-                        #          h5("Riello, Giorgio and Prasannan Parthasarathi, eds. The Spinning World: A Global History of Cotton Textiles, 1200-1850. Oxford University Press, 2009."),
-                        #          h5("Sangar, Satya Prakash. Indian Textiles in the Seventeenth Century. New Delhi: Reliance Publishing House, 1998."),
-                        #          h5('Van Groesen, Michiel. "Global Trade." In H. Helmers & G. Janssen, eds., The Cambridge Companion to the Dutch Golden Age. Cambrudge Companions to Culture, 166-186. Cambridge: Cambridge University Press, 2018.'),
-                        #          h5("Whitechapel Art Gallery. Woven air: the muslin & kantha tradition of Bangladesh. London: Whitechapel Art Gallery, 1988.")
-                        # )
                     )
                 )
 )
 
 server <- function(input, output, session) {
     
-    
-    
-    
-    # 
     # res_mod <- callModule(
     #   module = selectizeGroupServer,
     #   id = "my-filters",
     #   data = joined.data.original,
     #   vars = c("var_one", "var_two", "var_three", "var_four", "var_five")
     # )  
-    # 
     
+    # For secondary sources
     
     reactivedata1 <- reactive({
         input$updateBtn
@@ -328,43 +291,9 @@ server <- function(input, output, session) {
         #browser()
         
         return (data)
-        
-        
     })
     
-    # Codes for the fact sheet function - generate a fact sheet by extracting key words from definitions
-    # k=toString(secondarydefinitions,width = 0)
-    # colorsextracted=str_extract_all(k, "white|red|yellow|blue|brown|green|purple|gold")
-    # patternextracted=str_extract_all(k, "checkered|flowered|striped|")
-    # materialextracted=str_extract_all(k, "cotton-and-silk|cotton|silk|thread|dye|mordants|madder")
-    # #usageextracted=str_extract_all(k,"coats|lining")
-    # #qualityextracted=str_extract_all(k,"poor|coarse|medium|good|superior")
-    # 
-    # colorsextracted=unique(unlist(colorsextracted))
-    # patternextracted=unique(unlist(patternextracted))
-    # materialextracted=unique(unlist(materialextracted))
-    # usageextracted=unique(unlist(usageextracted))
-    # qualityextracted=unique(unlist(qualityextracted))
-    # 
-    # output$Textilename = renderText("Textile Chosen:")
-    # 
-    # output$nameextract = renderText(Input$name)
-    # 
-    # output$color = renderText("Colors:")
-    # output$colorsextracted=renderPrint(colorsextracted)
-    # 
-    # output$pattern = renderText("Patterns:")
-    # output$patternextracted=renderPrint(patternextracted)  
-    # 
-    # output$material = renderText("Materials:")
-    # output$materialextracted=renderPrint(materialextracted) 
-    # 
-    # output$usage = renderText("Usage:")
-    # output$usageextracted=renderPrint(usageextracted) 
-    # 
-    # output$quality = renderText("Quality:")
-    # output$qualityextracted=renderPrint(qualityextracted) 
-    
+    #Rendering a data table to be able to download data from
     output$factsheet = renderDT({
         #   input$table_updateBtn
         #   #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
@@ -384,8 +313,12 @@ server <- function(input, output, session) {
     )
     
     
+    #### REACTIVE DATA #### 
     
-    reactive_data <- reactive({
+    # Inputs whose results will change over time 
+    # Isolating changes and updating data according to inputs
+   
+     reactive_data <- reactive({
         input$updateBtn
         input$graph_updateBtn
         input$table_updateBtn
@@ -412,7 +345,7 @@ server <- function(input, output, session) {
         
         data <- joined.data
         
-        
+        # Creating a function to filter data by the user-selected inputs
         private_filter_by <- function(d, col, data_col){
             if(length(col) != 0 && !is.null(col)){
                 d <- d %>%
@@ -459,6 +392,11 @@ server <- function(input, output, session) {
     })
     
     
+    #### OUTPUTS #### 
+    
+    # Rendering reactive data 
+    
+    # Textile Name
     output$TextileName <- renderUI({
         selectizeInput(inputId = "textileName",
                        label = "Select one or more textile(s) of interest",
@@ -468,6 +406,7 @@ server <- function(input, output, session) {
         
     })
     
+    # Origin
     output$Origins <- renderUI({
         selectizeInput(inputId = "origins",
                        label = "Select one or more origin(s) of interest",
@@ -480,9 +419,10 @@ server <- function(input, output, session) {
                        choices = levels(factor(reactive_data()$orig_loc_region_modern)),
                        selected = input$origins,
                        multiple = TRUE)
-        
     })
     
+    
+    # Destination
     output$Destinations <- renderUI({
         selectizeInput(inputId = "destinations",
                        label = "Select one or more destination(s) of interest",
@@ -498,39 +438,26 @@ server <- function(input, output, session) {
         
     })
     
-    
+    # Colors
     output$Colors <- renderUI({
-        
-        
         pre_unique <- str_split(unique(reactive_data()$colorList), ", ")
-        
         list <- c()
         for (i in 1:length(pre_unique)){
-            
             list <- append(list,pre_unique[[i]])
-            
         }
-        
         color_choices <- unique(as.vector(list))
-        
-        
-        
+
         selectizeInput(inputId = "colors",
                        label = "Select one or more color(s) of interest",
                        choices = color_choices,
                        selected = isolate(input$colors),
                        multiple = TRUE
         )
-        
     })
     
-    
-    
-    
+    # Pattern
     output$Pattern <- renderUI({
-        patterns <-
-            unique(as.vector(reactive_data()$textile_pattern_arch))
-        
+        patterns <- unique(as.vector(reactive_data()$textile_pattern_arch))
         selectizeInput(
             inputId = "Pattern",
             label = "Select one or more pattern(s) of interest",
@@ -538,96 +465,66 @@ server <- function(input, output, session) {
             selected = input$patterns,
             multiple = TRUE
         )
-        
     })
     
-    
+    # Process
     output$Process <- renderUI({
-        
-        
         selectizeInput(
             inputId = "process",
             label = "Select one or more process(es) of interest",
             choices = levels(factor(reactive_data()$textile_process_arch)),
             selected = input$process,
             multiple = TRUE)
-        
-        
     })
     
-    
+    # Fibers
     output$Fibers <- renderUI({
-        
         selectizeInput(inputId = "fibers",
                        label = "Choose fiber(s) of interest",
                        choices = levels(factor(reactive_data()$textile_fiber_arch)),
                        selected = input$fibers,
                        multiple = TRUE)
-        
-        
     })
     
-    output$InferredQualities <- renderUI({
-        
-        selectizeInput(inputId = "inferredQualities",
-                       label = "Choose value range(s) of interest",
-                       choices = levels(factor(reactive_data()$textile_quality_inferred)),
-                       selected = input$inferredQualities,
-                       multiple = TRUE)
-        
-        
-        
-    })
-    
+    # Geography
     output$Geography <- renderUI({
-        
         selectizeInput(inputId = "geography",
                        label = "Select one or more geography of interest",
                        choices = levels(factor(reactive_data()$textile_geography_arch)),
                        selected = input$geography,
                        multiple = TRUE)
-        
-        
     })
     
+    
+    # Qualities
     output$Qualities <- renderUI({
-        
-        
         user_choices <- levels(factor(joined.data$textile_quality_arch))
-        
-        
         selectizeInput(inputId = "qualities",
                        label = "Select one or more quality(s) of interest",
                        choices = user_choices,
                        selected = input$qualities,
                        multiple = TRUE)
-        
-        
-        
-        
     })
     
+    
+    # Year
     output$Year <- renderUI({
-        
         user_choices <-levels(factor(c(reactive_data()$orig_yr,reactive_data()$dest_yr)))
-        
         selectizeInput(inputId = "year",
                        label = "Select one or more year(s) of interest",
                        choices = user_choices,
                        selected = input$year,
                        multiple = TRUE)
-        
         #user_choices in input year
-        
     })
     
     
     observe
     
     
+    #### DATA TABLE OUTPUT FOR DATA-CATALOG TAB & DOWNLOAD #### 
     
-    
-    #creates table
+    # Creates table of data to downlaod 
     output$update_inputs <- renderDT({
         input$table_updateBtn
         #isolate(filter_by_inputs(joined.data.original,isolate(input)))}) #filters the data for what has been searched
@@ -648,6 +545,9 @@ server <- function(input, output, session) {
                 reactive_data(), file)
         }
     )
+    
+    
+    #### RENDERING THE MAP #### 
     
     #The map of countries to be rendered
     output$countriesMap <- renderLeaflet({
@@ -700,11 +600,10 @@ server <- function(input, output, session) {
     })
     
     
-    
-    #want to integrate ggploty to have interactie charts
-    
+    #### RENDERING THE PIE CHART #### 
     
     #Used to render the plot for pie chart
+    # When user clicks on a location in the map, the pie chart will appear/update
     output$pieChart <- renderPlot({
         input$updateBtn
         input$graph_updateBtn
@@ -810,142 +709,9 @@ server <- function(input, output, session) {
             # }
         }
     })
+
+    #### RENDERING THE BAR CHART #### 
     
-    #' #Rendering the bar chart - this works nearly the exact same way as the pie chart
-    #' #except when it is graphing the outputs, it is doing so with a bar chart instead of a pie chart
-    #' ## Now the bar chart only shows up when clicking on a specific region
-    #' output$barChart <- renderPlot({
-    #'     input$updateBtn
-    #'     input$graph_updateBtn
-    #'     name <- input$countriesMap_shape_click$id
-    #'     
-    #'     joined.data = reactive_data()
-    #'     bar.data = joined.data
-    #'     
-    #'     # choice <- get_regionChoice(regionChoice) #get dest or orig
-    #'     # if(length(name) != 0){
-    #'     #     bar.data <- joined.data %>%
-    #'     #         filter(joined.data[choice] == name)
-    #'     # }
-    #'     # else{
-    #'     #     bar.data <- joined.data}
-    #'     
-    #'     
-    #'     #if(!is.null(name) && length(name) != 0){
-    #'     modifier <- isolate(input$barChart)
-    #'     #modifierObj <- paste("`", names(modVec)[modVec == modifier], "`", sep = "")
-    #'     #dataSet <- isolate(input$dataSet)
-    #'     dataType <- isolate(input$dataType)
-    #'     regionChoice <- isolate(input$regionChoice)
-    #'     textileName <- isolate(input$textileName)
-    #'     colors <- isolate(input$colors)
-    #'     patterns <- isolate(input$patterns)
-    #'     process <- isolate(input$process)
-    #'     fibers <- isolate(input$fibers)
-    #'     geography <- isolate(input$geography)
-    #'     qualities <- isolate(input$qualities)
-    #'     inferredQualities <- isolate(input$inferredQualities)
-    #'     #orig_yr <- isolate(input$orig_yr)
-    #'     year <- isolate(input$year)
-    #'     facet <- isolate(input$facet)
-    #'     #dest_yr <- isolate(input$dest_yr)
-    #'         
-    #'     values <- c()   
-    #'         
-    #'     values <- c(
-    #'         #'name' = name,
-    #'         'modifier' = modifier,
-    #'         #'modifierObj' = modifierObj,
-    #'         #'dataSet' = dataSet,
-    #'         'dataType'= dataType,
-    #'         'regionChoice' =  regionChoice ,
-    #'         'textileName' = textileName,
-    #'         'colors' = colors,
-    #'         'patterns' = patterns,
-    #'         'process' = process,
-    #'         'fibers' = fibers,
-    #'         'geography' = geography,
-    #'         'qualities' = qualities,
-    #'         'inferredQualities' = inferredQualities,
-    #'         #'orig_yr' = orig_yr,
-    #'         'year' = year,
-    #'         'facet' = facet
-    #'     )
-    #'         
-    #'         
-    #'     #joined.data <- joined.data.original
-    #'         
-    #'     #joined.data <- isolate(filter_by_inputs(joined.data,isolate(input)))
-    #' 
-    #'     
-    #'     if(!is.null(name) && length(name) != 0){
-    #'         if(regionChoice == "Destination"){
-    #'             bar.data <- bar.data %>%
-    #'                 filter(dest_country == name) %>%
-    #'                 select(textile_quantity,
-    #'                        deb_dec,
-    #'                        orig_yr,
-    #'                        dest_yr,
-    #'                        all_of(modifier),
-    #'                        company)
-    #'         }
-    #'         
-    #'         else{
-    #'             bar.data <- bar.data %>%
-    #'                 filter(orig_country == name) %>%
-    #'                 select(textile_quantity,
-    #'                        deb_dec,
-    #'                        orig_yr,
-    #'                        dest_yr,
-    #'                        all_of(modifier),
-    #'                        company)
-    #'         }
-    #'     }
-    #'     
-    #'     else{
-    #'         bar.data = reactive_data()
-    #'     }
-    #'              
-    #'         
-    #'     if(input$omitNAs){
-    #'         if (modifier == "colorList"){
-    #'             bar.data <- bar.data %>%
-    #'                 mutate(colorList = ifelse(colorList == "No color indicated",NA, colorList))
-    #'         }
-    #'             
-    #'         bar.data <- bar.data %>%
-    #'             na.omit()
-    #'             
-    #'     }
-    #'     else{
-    #'         bar.data[4][is.na(bar.data[4])] <- "None indicated"
-    #'     }
-    #'         
-    #'     # if(isolate(input$dataSet) == "West India Company (WIC)"){
-    #'     #     bar.data <- bar.data %>% filter(company == "WIC")
-    #'     # }
-    #'     # if(isolate(input$dataSet) == "East India Company (VOC)"){
-    #'     #     bar.data <- bar.data %>% filter(company == "VOC")
-    #'     # }
-    #'         
-    #'         
-    #'     #ggplotly
-    #'     createBarChart(bar.data,values)
-    #'     
-    #'     
-    #'     # ggplot(reactive_data(), aes(x=textile_name, y=modifier)) + geom_bar(stat="identity") + 
-    #'     #     labs(x="Orig_yr", y=modifier)
-    #'     #     
-    #'     #}
-    #'     # else{
-    #'     #     ggplot() +
-    #'     #         ggtitle(label = paste("No data for these filters."))
-    #'     #     
-    #'     #     
-    #'     # }
-    #'     
-    #' })
-    #' 
     #Rendering the bar chart - this works nearly the exact same way as the pie chart
     #except when it is graphing the outputs, it is doing so with a bar chart instead of a pie chart
     output$barChart <- renderPlot({
