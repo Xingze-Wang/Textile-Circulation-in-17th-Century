@@ -1,0 +1,13 @@
+name: aug26
+title: aug26
+username:
+account: sanjanaroy
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6200395
+bundleId: 5858533
+url: https://sanjanaroy.shinyapps.io/aug26/
+when: 1651461193.76019
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app.R
